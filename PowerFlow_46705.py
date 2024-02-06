@@ -14,8 +14,33 @@ import numpy as np
 def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
     ''' String here with purpose '''
     # implement your code here
-
-    return V,success,n
+     success = 0 #Initializationof statusflagand iterationcounter
+     n = 0
+     V = V0
+     print(' iteration maximumP &Q mismatch(pu)')
+     print('------------------------------------')
+     #Determinemismatchbetweeninitialguessand andspecifiedvalueforP andQ
+     F = calculate_F(Ybus,Sbus,V,pv_index,pq_index)
+     #Checkif thedesiredtoleranceisreached
+     success =CheckTolerance(F,n,err_tol)
+     #Startthe Newtoniterationloop
+     while (notsuccess) and (n < max_iter):
+         n += 1 # Updatecounter
+         # ComputederivativesandgeneratetheJacobianmatrix
+         J_dS_dVm,J_dS_dTheta = generate_Derivatives(Ybus,V)
+         J = generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index)
+         # Computetheupdatestep
+         dx = np.linalg.solve(J,F)
+         # Updatevoltagesand checkiftoleranceisnow reached
+         V =Update_Voltages(dx,V,pv_index,pq_index)
+         F = calculate_F(Ybus,Sbus,V,pv_index,pq_index)
+         success = CheckTolerance(F,n,err_tol)
+     
+     if success: #printoutmessageconcerningwetherthe powerflowconvergedornot
+         print('TheNewtonRapsonPowerFlow Convergedin %diterations!'% (n,))
+     else:
+         print('No Convergence!!!\n Stoppedafter%diterationswithoutsolution...'% (n,))
+     return V,success,n
 
 
 # 2. the calculate_F() function
