@@ -83,10 +83,18 @@ def generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index):
 
 # 6. the Update_Voltages() function
 def Update_Voltages(dx,V,pv_index,pq_index):
-    # Note:differencebetweenPythonand Matlabwhenusingindices
+    # Note:differencebetween Python and Matlab when using indices
     N1 = 0; N2 = len(pv_index) # dx[N1:N2]-ang.onthe pvbuses
     N3 = N2; N4 = N3 + len(pq_index)# dx[N3:N4]-ang.onthe pqbuses
     N5 = N4; N6 = N5 + len(pq_index)# dx[N5:N6]-mag.onthe pqbuses
+
+    Theta= np.angle(V);Vm =np.absolute(V)
+    if len(pv_index)>0:
+        Theta[pv_index]+= dx[N1:N2]
+    if len(pq_index)>0:
+        Theta[pq_index]+= dx[N3:N4]
+        Vm[pq_index]+=dx[N5:N6]
+    V = Vm * np.exp(1j*Theta)
     return V
 
 
