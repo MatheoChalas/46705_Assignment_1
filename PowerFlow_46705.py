@@ -65,13 +65,28 @@ def generate_Derivatives(Ybus,V):
 
 # 5. the generate_Jacobian() function
 def generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index):
+    #AppendPV andPQ indicesforconvenience
+    pvpq_ind= np.append(pv_index,pq_index)
+    
+    #Create the sub-matrices
+    J_11= np.real(J_dS_dTheta[np.ix_(pvpq_ind,pvpq_ind)])
+    J_12= np.real(J_dS_dVm[np.ix_(pvpq_ind,pq_index)])
+    J_21= np.imag(J_dS_dTheta[np.ix_(pq_index,pvpq_ind)])
+    J_22= np.imag(J_dS_dVm[np.ix_(pq_index,pq_index)])
 
+    #Compute the Jacobian
+    J= np.block([[J_11,J_12],[J_21,J_22]])
+
+    
     return J
 
 
 # 6. the Update_Voltages() function
 def Update_Voltages(dx,V,pv_index,pq_index):
-
+    # Note:differencebetweenPythonand Matlabwhenusingindices
+    N1 = 0; N2 = len(pv_index) # dx[N1:N2]-ang.onthe pvbuses
+    N3 = N2; N4 = N3 + len(pq_index)# dx[N3:N4]-ang.onthe pqbuses
+    N5 = N4; N6 = N5 + len(pq_index)# dx[N5:N6]-mag.onthe pqbuses
     return V
 
 
