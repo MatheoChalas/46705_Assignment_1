@@ -46,6 +46,10 @@ def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
 # 2. the calculate_F() function
 def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
     Delta_S= Sbus- V * (Ybus.dot(V)).conj()
+
+    Delta_P[pv_index]=Delta_S[pv_index].real
+    Delta_P[pq_index]=Delta_S[pq_index].real
+    Delta_q[pq_index]=Delta_S[pq_index].imag
     
     F= np.concatenate((Delta_P[pv_index],Delta_P[pq_index],Delta_Q[pq_index]),axis=0)
 
