@@ -63,7 +63,8 @@ def CheckTolerance(F,n,err_tol):
 
 # 4. the generate_Derivatives() function
 def generate_Derivatives(Ybus,V):
-
+J_ds_dVm=np.diag(V/np.absolute(V)).dot(np.diag((Ybus.dot(V)).conj()))+ np.diag(V).dot(Ybus.dot(np.diag(V/np.absolute(V))).conj())
+J_dS_dTheta = 1j*np.diag(V).dot((np.diag(Ybus.dot(V))-Ybus.dot(np.diag(V))).conj())
     return J_ds_dVm,J_dS_dTheta
 
 
