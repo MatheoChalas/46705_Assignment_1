@@ -58,19 +58,25 @@ def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
 
 # 3. the CheckTolerance() function
 def CheckTolerance(F,n,err_tol):
-
+    normF = np.linalg.norm(F,np.inf)
+    if normF<err_tol:
+        success=1
+        print(normF,n)
+    else :
+        success=0
     return success
 
 # 4. the generate_Derivatives() function
 def generate_Derivatives(Ybus,V):
-J_ds_dVm=np.diag(V/np.absolute(V)).dot(np.diag((Ybus.dot(V)).conj()))+ np.diag(V).dot(Ybus.dot(np.diag(V/np.absolute(V))).conj())
-J_dS_dTheta = 1j*np.diag(V).dot((np.diag(Ybus.dot(V))-Ybus.dot(np.diag(V))).conj())
+    J_ds_dVm=np.diag(V/np.absolute(V)).dot(np.diag((Ybus.dot(V)).conj()))+ np.diag(V).dot(Ybus.dot(np.diag(V/np.absolute(V))).conj())
+    J_dS_dTheta = 1j*np.diag(V).dot((np.diag(Ybus.dot(V))-Ybus.dot(np.diag(V))).conj())
+
     return J_ds_dVm,J_dS_dTheta
 
 
 # 5. the generate_Jacobian() function
 def generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index):
-    #AppendPV andPQ indicesforconvenience
+    #AppendPV andPQ indices for convenience
     pvpq_ind= np.append(pv_index,pq_index)
     
     #Create the sub-matrices
@@ -82,7 +88,6 @@ def generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index):
     #Compute the Jacobian
     J= np.block([[J_11,J_12],[J_21,J_22]])
 
-    
     return J
 
 
@@ -100,6 +105,7 @@ def Update_Voltages(dx,V,pv_index,pq_index):
         Theta[pq_index]+= dx[N3:N4]
         Vm[pq_index]+=dx[N5:N6]
     V = Vm * np.exp(1j*Theta)
+
     return V
 
 
