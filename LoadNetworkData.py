@@ -24,7 +24,7 @@ def LoadNetworkData(filename):
   bus_data, load_data, gen_data, line_data, tran_data, mva_base, bus_to_ind, ind_to_bus = rd.read_network_data_from_file(filename)
   
   N=len(line_data[0])
-  Ybus = np.zeros(N,N)
+  Ybus = np.zeros((N,N))
   Y=np.array([1/(line_data[k,3]+1.J*line_data[k,4]) for k in range(N)])
   B=np.array([(1.J*line_data[k,5])/2 for k in range(N)])
   
@@ -39,9 +39,5 @@ def LoadNetworkData(filename):
 
   return Ybus
 
-  print(LoadNetworkData(filename))
-    
-  
-  return(Ybus, Y_from, Y_to, br_f, br_t, buscode, bus_labels, S_LDMVA_base)
+print(LoadNetworkData(filename))
 
-filename = 'TestSystem.txt'
