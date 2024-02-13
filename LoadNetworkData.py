@@ -53,26 +53,26 @@ def LoadNetworkData(filename):
     bus_kv = np.array(bus_kv)
 
 
- Sbus= np.zeros(N, dtype=complex)
- SLD = np.zeros(N, dtype=complex)
- 
- for line in load_data:
-     bus_nr, PLD, QLD = line
-     ind_nr = bus_to_ind[bus_nr]
-     SLD =(PLD+1j*QLD)/MVA_base
-     Sbus[ind_nr] += -SLD 
+    Sbus= np.zeros(N, dtype=complex)
+    SLD = np.zeros(N, dtype=complex)
      
- for line in gen_data:
-     bus_nr, MVA_size, p_gen = line
-     ind_nr = bus_to_ind[bus_nr]
-     SLD =(p_gen)/MVA_base
-     Sbus[ind_nr] += SLD 
-
-V0 = np.ones(N,dtype=np.complex)
-buscode = np.array([3, 2, 1])
-pq_index = np.where(buscode == 1)[0]
-pv_index = np.where(buscode == 2)[0]
-ref = np.where(buscode == 3)[0]
+    for line in load_data:
+        bus_nr, PLD, QLD = line
+        ind_nr = bus_to_ind[bus_nr]
+        SLD =(PLD+1j*QLD)/MVA_base
+        Sbus[ind_nr] += -SLD 
+         
+    for line in gen_data:
+        bus_nr, MVA_size, p_gen = line
+        ind_nr = bus_to_ind[bus_nr]
+        SLD =(p_gen)/MVA_base
+        Sbus[ind_nr] += SLD 
+    
+    V0 = np.ones(N,dtype=np.complex)
+    buscode = np.array([3, 2, 1])
+    pq_index = np.where(buscode == 1)[0]
+    pv_index = np.where(buscode == 2)[0]
+    ref = np.where(buscode == 3)[0]
 
 #bus-branch matrices
     N_branches = len(line_data) + len(tran_data)
@@ -87,7 +87,7 @@ ref = np.where(buscode == 3)[0]
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
         Z_se = R + 1j*X; Y_se = 1/Z_se
-        Y_sh_2 = 1j*B_2
+        Y_sh_2 = 1j*B_2/2
         # update the entries
         Y_fr[i,ind_fr] =  Y_se + Y_sh_2       
         Y_fr[i,ind_to] = -Y_se
