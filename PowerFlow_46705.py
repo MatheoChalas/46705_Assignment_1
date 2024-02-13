@@ -113,8 +113,66 @@ def Update_Voltages(dx,V,pv_index,pq_index):
 ####################################################
 #  Displaying the results in the terminal window   #
 ####################################################
+from tabulate import tabulate
 def DisplayResults(V,lnd):
 Ybus=lnd . Ybus ; Y_from=lnd . Y_fr ; Y_to=lnd . Y_to ; br_f=lnd . br_f ; br_t=lnd . br_t ; 3 buscode=lnd . buscode;
 SLD=lnd . S_LD ; ind_to_bus=lnd . ind_to_bus;4 bus_to_ind=lnd . bus_to_ind ; MVA_base=lnd . MVA_base ; bus_labels=lnd . bus_labels
-   
+from tabulate import tabulate
+
+def DisplayResults(V, lnd):
+    # Obtener información relevante de lnd
+    Ybus = lnd.Ybus
+    Y_from = lnd.Y_fr
+    Y_to = lnd.Y_to
+    br_f = lnd.br_f
+    br_t = lnd.br_t
+    buscode = lnd.buscode
+    SLD = lnd.S_LD
+    ind_to_bus = lnd.ind_to_bus
+    bus_to_ind = lnd.bus_to_ind
+    MVA_base = lnd.MVA_base
+    bus_labels = lnd.bus_labels
+    
+    # Bus results
+    bus_results = []
+    for bus_label in bus_labels:
+        bus_index = bus_to_ind[bus_label]
+        bus_voltage_mag = abs(V[bus_index])
+        bus_voltage_ang = np.angle(V[bus_index], deg=True)
+        generation_P = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).real / MVA_base
+        generation_Q = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).imag / MVA_base
+        load_P = -SLD[bus_index].real
+        load_Q = -SLD[bus_index].imag
+
+        bus_results.append([bus_index, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q, load_P, load_Q])
+
+    # Branch flow results
+    branch_results = []
+    for i in range(len(br_f)):
+        from_bus = ind_to_bus[br_f[i] + 1]
+        to_bus = ind_to_bus[br_t[i] + 1]
+        from_bus_injection_P = V[br_f[i]] * np.conj(Y_from[i].dot(V)).real / MVA_base
+        from_bus_injection_Q = V[br_f[i]] * np.conj(Y_from[i].dot(V)).imag / MVA_base
+        to_bus_injection_P = V[br_t[i]] * np.conj(Y_to[i].dot(V)).real / MVA_base
+        to_bus_injection_Q = V[br_t[i]] * np.conj(Y_to[i].dot(V)).imag / MVA_base
+
+        branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
+
+    #show results
+    headers_bus = ["Bus Nr", "Label", "Voltage Mag (pu)", "Voltage Ang (deg)", "Generation P (pu)", "Generation Q (pu)", "Load P (pu)", "Load Q (pu)"]
+    headers_branch = ["Branch Nr", "From Bus", "To Bus", "From Bus Inject. P (pu)", "From Bus Inject. Q (pu)", "To Bus Inject. P (pu)", "To Bus Inject. Q (pu)"]
+
+    print("=====================================================================")
+    print("| Bus results |")
+    print("=====================================================================")
+    print(tabulate(bus_results, headers=headers_bus, tablefmt="fancy_grid"))
+    print("=====================================================================")
+
+    print("\n=========================================================")
+    print("| Branch flow |")
+    print("=========================================================")
+    print(tabulate(branch_results, headers=headers_branch, tablefmt="fancy_grid"))
+    print("=========================================================")
+
+
 return
