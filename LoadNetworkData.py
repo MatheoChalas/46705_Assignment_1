@@ -37,7 +37,23 @@ def LoadNetworkData(filename):
       else :
         Ybus[k,i]=Ybus[i,k]
 
-  return Ybus
+ Sbus= np.zeros(N, dtype=complex)
+ SLD = np.zeros(N, dtype=complex)
+ 
+ for line in load_data:
+     bus_nr, PLD, QLD = line
+     ind_nr = bus_to_ind[bus_nr]
+     SLD =(PLD+1j*QLD)/MVA_base
+     Sbus[ind_nr] += -SLD 
+     
+ for line in gen_data:
+     bus_nr, MVA_size, p_gen = line
+     ind_nr = bus_to_ind[bus_nr]
+     SLD =(p_gen)/MVA_base
+     Sbus[ind_nr] += SLD 
+
+V0 = np.ones(N,dtype=np.complex)
+  return Ybus, Sbus, SLD
 
 print(LoadNetworkData(filename))
 
