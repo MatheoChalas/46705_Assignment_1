@@ -18,24 +18,40 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-  global Ybus, Y_from, Y_to, br_f, br_t, buscode, bus_labels, S_LDMVA_base
-  
-  #read in the data from the file...
-  bus_data, load_data, gen_data, line_data, tran_data, mva_base, bus_to_ind, ind_to_bus = rd.read_network_data_from_file(filename)
-  
-  N=len(line_data[0])
-  Ybus = np.zeros((N,N))
-  Y=np.array([1/(line_data[k,3]+1.J*line_data[k,4]) for k in range(N)])
-  B=np.array([(1.J*line_data[k,5])/2 for k in range(N)])
-  
-  for k in range(N):
-    for i in range(N):
-      if k==i:
-        Ybus[k,i]=sum(Y,B,-Y[k]-B[k])
-      if k<i:
-        Ybus[k,i]=-Y[i-1]
-      else :
-        Ybus[k,i]=Ybus[i,k]
+    bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus = \
+    read_network_data_from_file(file_name)
+
+    MVA_base = mva_base   #OBS...... should be a part of the network data....
+    N = len(bus_data)
+    Ybus = np.zeros((N,N),dtype=complex)
+    
+    for line in line_data:
+        bus_fr, bus_to, id_, R,X,B_2 = line #unpack
+        ind_fr = bus_to_ind[bus_fr]    
+        ind_to = bus_to_ind[bus_to] 
+        Z_se = R + 1j*X; Y_se = 1/Z_se
+        Y_sh_2 = 1j*B_2
+        
+        #Update the matrix:
+        Ybus[ind_fr,ind_fr]+= Y_se + Y_sh_2
+        Ybus[ind_to,ind_to]+= Y_se + Y_sh_2
+        Ybus[ind_fr,ind_to]+= -Y_se
+        Ybus[ind_to,ind_fr]+= -Y_se
+        
+        
+    #Get transformer data as well...
+    bus_kv = []
+    buscode = []
+    bus_labels = []
+    for line in bus_data:
+        b_nr, label, kv, code = line
+        buscode.append(code)
+        bus_labels.append(label)
+        bus_kv.append(kv)
+        
+    buscode = np.array(buscode)
+    bus_kv = np.array(bus_kv)
+
 
  Sbus= np.zeros(N, dtype=complex)
  SLD = np.zeros(N, dtype=complex)
