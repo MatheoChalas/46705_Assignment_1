@@ -1,0 +1,9 @@
+importPowerFlow_46705as pf # importPowerFlowfunctions
+importLoadNetworkDataas lnd
+max_iter=30 #Iterationsettings
+err_tol=1e-4
+lnd.LoadNetworkData('NetworkData.txt') # LoadtheNetworkdata...
+V,success,n= pf.PowerFlowNewton(lnd.Ybus,lnd.Sbus,lnd.V0,lnd.pv_index,lnd.pq_index,max_iter,err_tol)
+# Displayresultsif thepowerflow analysisconverged
+ifsuccess:
+  pf.DisplayResults(V,lnd)
