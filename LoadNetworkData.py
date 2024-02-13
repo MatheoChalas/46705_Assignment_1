@@ -120,7 +120,7 @@ def LoadNetworkData(filename):
         Y_to[i,ind_to] =  Yps_mat[1,1]       
         Y_to[i,ind_fr] =  Yps_mat[1,0]
         
-  return Ybus, Sbus, V0,pv_index,pq_index
+    return Ybus, Sbus, V0,pv_index,pq_index
 
 print(LoadNetworkData(filename))
 
