@@ -18,8 +18,7 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus = \
-    read_network_data_from_file(file_name)
+    bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus =  read_network_data_from_file(file_name)
 
     MVA_base = mva_base   #OBS...... should be a part of the network data....
     N = len(bus_data)
@@ -120,7 +119,7 @@ def LoadNetworkData(filename):
         Y_to[i,ind_to] =  Yps_mat[1,1]       
         Y_to[i,ind_fr] =  Yps_mat[1,0]
         
-    return Ybus, Sbus, V0,pv_index,pq_index
+    return Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base
 
 print(LoadNetworkData(filename))
 
