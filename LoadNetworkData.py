@@ -18,8 +18,7 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus = \
-    read_network_data_from_file(file_name)
+    bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus = read_network_data_from_file(file_name)
 
     MVA_base = mva_base   #OBS...... should be a part of the network data....
     N = len(bus_data)
@@ -53,27 +52,51 @@ def LoadNetworkData(filename):
     bus_kv = np.array(bus_kv)
 
 
- Sbus= np.zeros(N, dtype=complex)
- SLD = np.zeros(N, dtype=complex)
- 
- for line in load_data:
-     bus_nr, PLD, QLD = line
-     ind_nr = bus_to_ind[bus_nr]
-     SLD =(PLD+1j*QLD)/MVA_base
-     Sbus[ind_nr] += -SLD 
+    Sbus= np.zeros(N, dtype=complex)
+    SLD = np.zeros(N, dtype=complex)
      
- for line in gen_data:
-     bus_nr, MVA_size, p_gen = line
-     ind_nr = bus_to_ind[bus_nr]
-     SLD =(p_gen)/MVA_base
-     Sbus[ind_nr] += SLD 
+    for line in load_data:
+        bus_nr, PLD, QLD = line
+        ind_nr = bus_to_ind[bus_nr]
+        SLD =(PLD+1j*QLD)/MVA_base
+        Sbus[ind_nr] += -SLD 
+         
+    for line in gen_data:
+        bus_nr, MVA_size, p_gen = line
+        ind_nr = bus_to_ind[bus_nr]
+        SLD =(p_gen)/MVA_base
+        Sbus[ind_nr] += SLD 
+    
+    V0 = np.ones(N,dtype=np.complex)
+    
+    pq_index = np.where(buscode == 1)[0]
+    pv_index = np.where(buscode == 2)[0]
+    ref = np.where(buscode == 3)[0]
 
-V0 = np.ones(N,dtype=np.complex)
-buscode = np.array([3, 2, 1])
-pq_index = np.where(buscode == 1)[0]
-pv_index = np.where(buscode == 2)[0]
-ref = np.where(buscode == 3)[0]
-  return Ybus, Sbus, V0,pv_index,pq_index
+        #bus-branch matrices
+    N_branches = len(line_data) + len(tran_data)
+    br_f = -np.ones(N_branches,dtype=int)
+    br_t = -np.ones(N_branches,dtype=int)
+    
+    Y_fr = np.zeros((N_branches,N),dtype=complex)
+    Y_to = np.zeros((N_branches,N),dtype=complex)
+        
+    for line,i in zip(line_data,range(len(line_data))):
+        bus_fr, bus_to, id_, R,X,B_2 = line #unpack
+        ind_fr = bus_to_ind[bus_fr]    
+        ind_to = bus_to_ind[bus_to] 
+        Z_se = R + 1j*X; Y_se = 1/Z_se
+        Y_sh_2 = 1j*B_2
+        # update the entries
+        Y_fr[i,ind_fr] =  Y_se + Y_sh_2       
+        Y_fr[i,ind_to] = -Y_se
+        Y_to[i,ind_to] =  Y_se + Y_sh_2       
+        Y_to[i,ind_fr] = -Y_se
+        br_f[i] = ind_fr
+        br_t[i] = ind_to
+
+
+    return Ybus, Sbus, V0,pv_index,pq_index
 
 print(LoadNetworkData(filename))
 
