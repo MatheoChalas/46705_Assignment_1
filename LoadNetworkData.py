@@ -53,6 +53,10 @@ def LoadNetworkData(filename):
      Sbus[ind_nr] += SLD 
 
 V0 = np.ones(N,dtype=np.complex)
+buscode = np.array([3, 2, 1])
+pq_index = np.where(buscode == 1)[0]
+pv_index = np.where(buscode == 2)[0]
+ref = np.where(buscode == 3)[0]
   return Ybus, Sbus, SLD
 
 print(LoadNetworkData(filename))
