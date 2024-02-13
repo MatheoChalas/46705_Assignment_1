@@ -73,6 +73,53 @@ buscode = np.array([3, 2, 1])
 pq_index = np.where(buscode == 1)[0]
 pv_index = np.where(buscode == 2)[0]
 ref = np.where(buscode == 3)[0]
+
+#bus-branch matrices
+    N_branches = len(line_data) + len(tran_data)
+    br_f = -np.ones(N_branches,dtype=int)
+    br_t = -np.ones(N_branches,dtype=int)
+    
+    Y_fr = np.zeros((N_branches,N),dtype=complex)
+    Y_to = np.zeros((N_branches,N),dtype=complex)
+        
+    for line,i in zip(line_data,range(len(line_data))):
+        bus_fr, bus_to, id_, R,X,B_2 = line #unpack
+        ind_fr = bus_to_ind[bus_fr]    
+        ind_to = bus_to_ind[bus_to] 
+        Z_se = R + 1j*X; Y_se = 1/Z_se
+        Y_sh_2 = 1j*B_2
+        # update the entries
+        Y_fr[i,ind_fr] =  Y_se + Y_sh_2       
+        Y_fr[i,ind_to] = -Y_se
+        Y_to[i,ind_to] =  Y_se + Y_sh_2       
+        Y_to[i,ind_fr] = -Y_se
+        br_f[i] = ind_fr
+        br_t[i] = ind_to
+    
+    for line,i in zip(tran_data,range(len(line_data),N_branches)):
+        bus_fr, bus_to, id_, R,X,n,ang1 = line #unpack
+        ind_fr = bus_to_ind[bus_fr]    
+        ind_to = bus_to_ind[bus_to] 
+        Zeq = R+1j*X; Yeq = 1/Zeq
+        c = n*np.exp(1j*ang1/180*np.pi)
+        ### adminttance matrix
+        Yps_mat = np.zeros((2,2),dtype=complex)
+        Yps_mat[0,0] = Yeq/np.abs(c)**2
+        Yps_mat[0,1] = -Yeq/c.conj()
+        Yps_mat[1,0] = -Yeq/c
+        Yps_mat[1,1] = Yeq
+        # indices
+        ind_ = np.array([ind_fr,ind_to])
+        #update
+        Ybus[np.ix_(ind_,ind_)] += Yps_mat
+        br_f[i] = ind_fr
+        br_t[i] = ind_to
+        # update the entries
+        Y_fr[i,ind_fr] =  Yps_mat[0,0]      
+        Y_fr[i,ind_to] =  Yps_mat[0,1]
+        Y_to[i,ind_to] =  Yps_mat[1,1]       
+        Y_to[i,ind_fr] =  Yps_mat[1,0]
+        
   return Ybus, Sbus, V0,pv_index,pq_index
 
 print(LoadNetworkData(filename))
