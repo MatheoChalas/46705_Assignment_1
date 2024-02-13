@@ -30,7 +30,7 @@ def LoadNetworkData(filename):
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
         Z_se = R + 1j*X; Y_se = 1/Z_se
-        Y_sh_2 = 1j*B_2
+        Y_sh_2 = 1j*B_2/2
         
         #Update the matrix:
         Ybus[ind_fr,ind_fr]+= Y_se + Y_sh_2
