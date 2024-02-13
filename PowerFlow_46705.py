@@ -114,5 +114,7 @@ def Update_Voltages(dx,V,pv_index,pq_index):
 #  Displaying the results in the terminal window   #
 ####################################################
 def DisplayResults(V,lnd):
-
-    return
+Ybus=lnd . Ybus ; Y_from=lnd . Y_fr ; Y_to=lnd . Y_to ; br_f=lnd . br_f ; br_t=lnd . br_t ; 3 buscode=lnd . buscode;
+SLD=lnd . S_LD ; ind_to_bus=lnd . ind_to_bus;4 bus_to_ind=lnd . bus_to_ind ; MVA_base=lnd . MVA_base ; bus_labels=lnd . bus_labels
+   
+return
