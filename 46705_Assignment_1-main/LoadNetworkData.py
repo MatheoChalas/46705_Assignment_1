@@ -121,7 +121,7 @@ def LoadNetworkData(filename):
         Y_to[i,ind_to] =  Yps_mat[1,1]       
         Y_to[i,ind_fr] =  Yps_mat[1,0]
         
-    return Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base
+    return Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels,Sbus, SLD, MVA_base,V0, pq_index, pv_index
 
 print(LoadNetworkData(filename))
 
