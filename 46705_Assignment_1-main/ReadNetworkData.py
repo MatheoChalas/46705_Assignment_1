@@ -217,14 +217,13 @@ if __name__=="__main__":
     for line in gen_data:
         bus_nr, MVA_size, p_gen = line
         ind_nr = bus_to_ind[bus_nr]
-        SLD =(p_gen)/MVA_base
-        Sbus[ind_nr] += SLD # load is a negative injection...
+        S_LD =(p_gen)/MVA_base
+        Sbus[ind_nr] += S_LD # load is a negative injection...
         
      
     pq_index = np.where(buscode== 1)[0]# Find indices for all PQ-busses 
     pv_index = np.where(buscode== 2)[0]# Find indices for all PV-busses
     ref = np.where(buscode== 3)[0] # Find index for ref bus
-    
 
     #bus-branch matrices
     N_branches = len(line_data) + len(tran_data)

@@ -46,14 +46,14 @@ def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
 # 2. the calculate_F() function
 def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
     Delta_P=np.zeros(pv_index+pq_index)
-    Delta_Q=np.zeros(pq_index)
+    Delta_Q=np.zeros(pv_index+pq_index)
     
     Delta_S= Sbus- V * (Ybus.dot(V)).conj()
     Delta_P[pv_index]=Delta_S[pv_index].real
     Delta_P[pq_index]=Delta_S[pq_index].real
-    Delta_Q[pq_index-1]=Delta_S[pq_index-1].imag
+    Delta_Q[pq_index]=Delta_S[pq_index].imag
     
-    F= np.concatenate((Delta_P[pv_index],Delta_P[pq_index],Delta_Q[pq_index-1]),axis=0)
+    F= np.concatenate((Delta_P[pv_index],Delta_P[pq_index],Delta_Q[pq_index]),axis=0)
 
     return F
 
@@ -61,9 +61,14 @@ def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
 # 3. the CheckTolerance() function
 def CheckTolerance(F,n,err_tol):
     normF = np.linalg.norm(F,np.inf)
+    if n==0:
+        print("Check Tolerance :")
+    print("Absolute value of the greatest mismatch : %f" %normF,"Iteration number : %d" %n)
+    
     if normF<err_tol:
         success=1
-        print(normF,n)
+        print("End of Check Tolerance")
+        print("------------------------------------")
     else :
         success=0
     return success
@@ -117,23 +122,25 @@ def Update_Voltages(dx,V,pv_index,pq_index):
 ####################################################
 from tabulate import tabulate
 def DisplayResults(V,lnd):
-
+    
     Ybus = lnd.Ybus
     Y_from = lnd.Y_fr
     Y_to = lnd.Y_to
     br_f = lnd.br_f
     br_t = lnd.br_t
     buscode = lnd.buscode
-    SLD = lnd.S_LD
+    SLD = lnd.SLD
     ind_to_bus = lnd.ind_to_bus
     bus_to_ind = lnd.bus_to_ind
     MVA_base = lnd.MVA_base
     bus_labels = lnd.bus_labels
+    Sbus=lnd.Sbus
     
+    """
     # Bus results
     bus_results = []
-    for bus_label in bus_labels:
-        bus_index = bus_to_ind[bus_label]
+    for bus_label in bus_labels:      
+        bus_index = np.where(bus_to_ind== bus_label)[0]
         bus_voltage_mag = abs(V[bus_index])
         bus_voltage_ang = np.angle(V[bus_index], deg=True)
         generation_P = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).real / MVA_base
@@ -145,6 +152,7 @@ def DisplayResults(V,lnd):
 
     # Branch flow results
     branch_results = []
+    
     for i in range(len(br_f)):
         from_bus = ind_to_bus[br_f[i] + 1]
         to_bus = ind_to_bus[br_t[i] + 1]
@@ -152,7 +160,48 @@ def DisplayResults(V,lnd):
         from_bus_injection_Q = V[br_f[i]] * np.conj(Y_from[i].dot(V)).imag / MVA_base
         to_bus_injection_P = V[br_t[i]] * np.conj(Y_to[i].dot(V)).real / MVA_base
         to_bus_injection_Q = V[br_t[i]] * np.conj(Y_to[i].dot(V)).imag / MVA_base
+        
+        branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
+    """ 
+    
+    S_inj = V*(Ybus.dot(V)).conj()
+    bus_results = []
+    for i in range(len(buscode)):
+        bus_index = i
+        bus_label = bus_labels[i]
+        bus_voltage_mag = round(abs(V[bus_index]),3)
+        bus_voltage_ang = round(np.angle(V[bus_index], deg=True),2)
+        load_P =0
+        load_Q =0
+        generation_P = 0
+        generation_Q = 0
+        
+        
+        if buscode[bus_index]==1:
+            load_P = -Sbus[bus_index].real
+            load_Q = -Sbus[bus_index].imag
+            
+        else:
+            generation_P = round(S_inj[bus_index].real,3)
+            generation_Q =  round(S_inj[bus_index].imag,3)
 
+        bus_results.append([bus_index+1, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q, load_P, load_Q])
+
+    # Branch flow results
+    branch_results = []
+        
+    for i in range(len(br_f)):
+        from_bus = ind_to_bus[br_f[i]]
+        to_bus = ind_to_bus[br_t[i]]
+        
+        S_to = round(V[br_t[i]]*(Y_to.dot(V)).conj()[i],3)
+        S_from = round(V[br_f[i]]*(Y_from.dot(V)).conj()[i],3)
+        
+        from_bus_injection_P = round(S_from.real ,3)
+        from_bus_injection_Q = round(S_from.imag ,3)
+        to_bus_injection_P = round(S_to.real,3)
+        to_bus_injection_Q = round(S_to.imag,3)
+        
         branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
 
     #show results
