@@ -136,34 +136,6 @@ def DisplayResults(V,lnd):
     bus_labels = lnd.bus_labels
     Sbus=lnd.Sbus
     
-    """
-    # Bus results
-    bus_results = []
-    for bus_label in bus_labels:      
-        bus_index = np.where(bus_to_ind== bus_label)[0]
-        bus_voltage_mag = abs(V[bus_index])
-        bus_voltage_ang = np.angle(V[bus_index], deg=True)
-        generation_P = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).real / MVA_base
-        generation_Q = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).imag / MVA_base
-        load_P = -SLD[bus_index].real
-        load_Q = -SLD[bus_index].imag
-
-        bus_results.append([bus_index, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q, load_P, load_Q])
-
-    # Branch flow results
-    branch_results = []
-    
-    for i in range(len(br_f)):
-        from_bus = ind_to_bus[br_f[i] + 1]
-        to_bus = ind_to_bus[br_t[i] + 1]
-        from_bus_injection_P = V[br_f[i]] * np.conj(Y_from[i].dot(V)).real / MVA_base
-        from_bus_injection_Q = V[br_f[i]] * np.conj(Y_from[i].dot(V)).imag / MVA_base
-        to_bus_injection_P = V[br_t[i]] * np.conj(Y_to[i].dot(V)).real / MVA_base
-        to_bus_injection_Q = V[br_t[i]] * np.conj(Y_to[i].dot(V)).imag / MVA_base
-        
-        branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
-    """ 
-    
     S_inj = V*(Ybus.dot(V)).conj()
     bus_results = []
     for i in range(len(buscode)):
