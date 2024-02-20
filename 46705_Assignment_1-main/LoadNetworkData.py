@@ -27,7 +27,8 @@ def LoadNetworkData(filename):
     Ybus = np.zeros((N,N),dtype=complex)
     
     for line in line_data:
-        bus_fr, bus_to, id_, R,X,B_2 = line #unpack
+        bus_fr, bus_to, id_, R,X,B_2 = line #unpack the lines
+        #Computation of the index and the impedance and admittance of each lines
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
         Z_se = R + 1j*X; Y_se = 1/Z_se
@@ -56,13 +57,15 @@ def LoadNetworkData(filename):
 
     Sbus= np.zeros(N, dtype=complex)
     SLD = np.zeros(N, dtype=complex)
-     
+    
+    #Get load data
     for line in load_data:
         bus_nr, PLD, QLD = line
         ind_nr = bus_to_ind[bus_nr]
         SLD =(PLD+1j*QLD)/MVA_base
         Sbus[ind_nr] += -SLD 
-         
+    
+    #Get generator data
     for line in gen_data:
         bus_nr, MVA_size, p_gen = line
         ind_nr = bus_to_ind[bus_nr]

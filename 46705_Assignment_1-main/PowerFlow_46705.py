@@ -45,13 +45,15 @@ def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
 
 # 2. the calculate_F() function
 def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
-    # Delta_P=np.zeros(len(pv_index)+len(pq_index))
-    # Delta_Q=np.zeros(len(pv_index)+len(pq_index))
     
+    #Computation of the apparent power
     Delta_S= Sbus- V * (Ybus.dot(V)).conj()
+    
+    #Computation of the active power and reactive power
     Delta_P=Delta_S.real
     Delta_Q=Delta_S.imag
     
+    #Computation of the matrix F which is the mismatch vector corresponding to the mismatch between the specified values and the calculated ones
     F= np.concatenate((Delta_P[pv_index],Delta_P[pq_index],Delta_Q[pq_index]),axis=0)
 
     return F
@@ -59,24 +61,36 @@ def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
 
 # 3. the CheckTolerance() function
 def CheckTolerance(F,n,err_tol):
+    #Computation of the maximal mismatch
     normF = np.linalg.norm(F,np.inf)
+    
+    #Display of the first line of the Test Tolerance
     if n==0:
         print("Check Tolerance :")
     print("Absolute value of the greatest mismatch : %f" %normF,"Iteration number : %d" %n)
     
+    #Display of the last line of the Test Tolerance and giving to success the value of 1 if the mismatch is lower than the error tolerated
     if normF<err_tol:
         success=1
         print("End of Check Tolerance")
         print("------------------------------------")
+    
+    #If the maximal mismatch is not below the error tolerated it gives the value of 0 to success 
     else :
         success=0
+        
+    #Return the value of success to check if we reached an acceptable mismatch for F
     return success
 
 # 4. the generate_Derivatives() function
 def generate_Derivatives(Ybus,V):
+    #Computation of the derivatives with respect to the voltage magnitude
     J_ds_dVm=np.diag(V/np.absolute(V)).dot(np.diag((Ybus.dot(V)).conj()))+ np.diag(V).dot(Ybus.dot(np.diag(V/np.absolute(V))).conj())
+    
+    #Computation of the derivatives with respect to the voltage angles
     J_dS_dTheta = 1j*np.diag(V).dot((np.diag(Ybus.dot(V))-Ybus.dot(np.diag(V))).conj())
 
+    #Return the derivatives
     return J_ds_dVm,J_dS_dTheta
 
 
@@ -99,19 +113,25 @@ def generate_Jacobian(J_dS_dVm,J_dS_dTheta,pv_index,pq_index):
 
 # 6. the Update_Voltages() function
 def Update_Voltages(dx,V,pv_index,pq_index):
-    # Note:differencebetween Python and Matlab when using indices
+    
     N1 = 0; N2 = len(pv_index) # dx[N1:N2]-ang.onthe pvbuses
     N3 = N2; N4 = N3 + len(pq_index)# dx[N3:N4]-ang.onthe pqbuses
     N5 = N4; N6 = N5 + len(pq_index)# dx[N5:N6]-mag.onthe pqbuses
-
-    Theta= np.angle(V);Vm =np.absolute(V)
+    
+    #Update of the voltages
+    Theta =np.angle(V);Vm =np.absolute(V)
+    #Test if the system has pv busses 
     if len(pv_index)>0:
+        #Summation of the dx corresponding to the pv busses with the voltage angles
         Theta[pv_index]+= dx[N1:N2]
     if len(pq_index)>0:
+        #Summation of the dx corresponding to the pq busses with the voltage angles first and then the voltage magnitudes
         Theta[pq_index]+= dx[N3:N4]
         Vm[pq_index]+=dx[N5:N6]
+    
+    #Computation of the Voltages
     V = Vm * np.exp(1j*Theta)
-
+    
     return V
 
 
@@ -122,6 +142,7 @@ def Update_Voltages(dx,V,pv_index,pq_index):
 from tabulate import tabulate
 def DisplayResults(V,lnd):
     
+    #Importation of all the values from the file lnd that we need to display the results
     Ybus = lnd.Ybus
     Y_from = lnd.Y_fr
     Y_to = lnd.Y_to
@@ -136,6 +157,7 @@ def DisplayResults(V,lnd):
     Sbus=lnd.Sbus
     
     
+    #Computation of the injected apparent powers
     S_inj = V*(Ybus.dot(V)).conj()
     bus_results = []
     
@@ -144,17 +166,20 @@ def DisplayResults(V,lnd):
     pv_index = np.where(buscode == 2)[0] # Find indices for all PV-busses
     ref = np.where(buscode == 3)[0] # Find index for ref bus
     
+    #Extraction of the needed values for all the busses 
     for i in range(len(bus_labels)):
         bus_index = i
         bus_label = bus_labels[i]
         bus_voltage_mag = round(abs(V[bus_index]),3)
         bus_voltage_ang = round(np.angle(V[bus_index], deg=True),2)
-        load_P =0
-        load_Q =0
-        generation_P = 0
-        generation_Q = 0
+        #Initialization of the powers to "-"
+        load_P = "-"
+        load_Q = "-"
+        generation_P = "-"
+        generation_Q = "-"
         
         
+        #Differenciation of the loads and generators
         if buscode[bus_index]==1:
             load_P = -Sbus[bus_index].real
             load_Q = -Sbus[bus_index].imag
@@ -167,11 +192,14 @@ def DisplayResults(V,lnd):
 
     # Branch flow results
     branch_results = []
-        
+    
+    #Extraction of the needed values for all the busses 
     for i in range(len(br_f)):
+        
         from_bus = ind_to_bus[br_f[i]]
         to_bus = ind_to_bus[br_t[i]]
         
+        #Computation of the apparent powers flowing in both directions
         S_to = round(V[br_t[i]]*(Y_to.dot(V)).conj()[i],3)
         S_from = round(V[br_f[i]]*(Y_from.dot(V)).conj()[i],3)
         
@@ -180,9 +208,12 @@ def DisplayResults(V,lnd):
         to_bus_injection_P = round(S_to.real,3)
         to_bus_injection_Q = round(S_to.imag,3)
         
+        #Add the wanted data to the branch results list
         branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
 
     #show results
+    
+    #Define the headers of the results
     headers_bus = ["Bus Nr", "Label", "Voltage Mag (pu)", "Voltage Ang (deg)", "Generation P (pu)", "Generation Q (pu)", "Load P (pu)", "Load Q (pu)"]
     headers_branch = ["Branch Nr", "From Bus", "To Bus", "From Bus Inject. P (pu)", "From Bus Inject. Q (pu)", "To Bus Inject. P (pu)", "To Bus Inject. Q (pu)"]
 
