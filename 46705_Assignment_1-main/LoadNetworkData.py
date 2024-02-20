@@ -15,7 +15,7 @@ mva_base: the system MVA base
 bus_to_ind: mapping from bus numbers to the corresponding indices in the bus matrices and arrays
 ind_to_bus: containing the mapping from the indices to the busses (the opposite of the above)
 """
-filename = 'TestSystem.txt'
+#filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
     global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index
@@ -70,7 +70,6 @@ def LoadNetworkData(filename):
         Sbus[ind_nr] += S_LD 
     
     V0 = np.ones(N,dtype=complex)
-    buscode = np.array([3, 2, 1])
     pq_index = np.where(buscode == 1)[0]
     pv_index = np.where(buscode == 2)[0]
     ref = np.where(buscode == 3)[0]
@@ -121,7 +120,7 @@ def LoadNetworkData(filename):
         Y_to[i,ind_to] =  Yps_mat[1,1]       
         Y_to[i,ind_fr] =  Yps_mat[1,0]
         
-    return Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus
+    return
 
 
 

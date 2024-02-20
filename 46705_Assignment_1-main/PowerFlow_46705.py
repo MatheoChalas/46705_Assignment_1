@@ -45,13 +45,12 @@ def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
 
 # 2. the calculate_F() function
 def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
-    Delta_P=np.zeros(pv_index+pq_index)
-    Delta_Q=np.zeros(pv_index+pq_index)
+    # Delta_P=np.zeros(len(pv_index)+len(pq_index))
+    # Delta_Q=np.zeros(len(pv_index)+len(pq_index))
     
     Delta_S= Sbus- V * (Ybus.dot(V)).conj()
-    Delta_P[pv_index]=Delta_S[pv_index].real
-    Delta_P[pq_index]=Delta_S[pq_index].real
-    Delta_Q[pq_index]=Delta_S[pq_index].imag
+    Delta_P=Delta_S.real
+    Delta_Q=Delta_S.imag
     
     F= np.concatenate((Delta_P[pv_index],Delta_P[pq_index],Delta_Q[pq_index]),axis=0)
 
@@ -136,9 +135,16 @@ def DisplayResults(V,lnd):
     bus_labels = lnd.bus_labels
     Sbus=lnd.Sbus
     
+    
     S_inj = V*(Ybus.dot(V)).conj()
     bus_results = []
-    for i in range(len(buscode)):
+    
+    
+    pq_index = np.where(buscode == 1)[0] # Find indices for all PQ-busses
+    pv_index = np.where(buscode == 2)[0] # Find indices for all PV-busses
+    ref = np.where(buscode == 3)[0] # Find index for ref bus
+    
+    for i in range(len(bus_labels)):
         bus_index = i
         bus_label = bus_labels[i]
         bus_voltage_mag = round(abs(V[bus_index]),3)
