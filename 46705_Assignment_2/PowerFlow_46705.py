@@ -130,19 +130,44 @@ def DisplayResults(V,lnd):
     bus_to_ind = lnd.bus_to_ind
     MVA_base = lnd.MVA_base
     bus_labels = lnd.bus_labels
+    Sbus=lnd.Sbus
+    
+    Gen_MVA = lnd.Gen_MVA
     
     # Bus results
+    S_inj = V*(Ybus.dot(V)).conj()
     bus_results = []
-    for bus_label in bus_labels:
-        bus_index = bus_to_ind[bus_label]
-        bus_voltage_mag = abs(V[bus_index])
-        bus_voltage_ang = np.angle(V[bus_index], deg=True)
-        generation_P = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).real / MVA_base
-        generation_Q = V[bus_index] * np.conj(Ybus[bus_index].dot(V)).imag / MVA_base
-        load_P = -SLD[bus_index].real
-        load_Q = -SLD[bus_index].imag
+    pq_index = np.where(buscode == 1)[0] # Find indices for all PQ-busses
+    pv_index = np.where(buscode == 2)[0] # Find indices for all PV-busses
+    ref = np.where(buscode == 3)[0] # Find index for ref bus
+    
+    #Extraction of the needed values for all the busses 
+    k=0
+    
+    for i in range(len(bus_labels)):
+        bus_index = i
+        bus_label = bus_labels[i]
+        bus_voltage_mag = round(abs(V[bus_index]),3)
+        bus_voltage_ang = round(np.angle(V[bus_index], deg=True),2)
+        #Initialization of the powers to "-"
+        load_P = "-"
+        load_Q = "-"
+        generation_P = "-"
+        generation_Q = "-"
+        loading="_"
+    
+    #Differenciation of the loads and generators
+        if buscode[bus_index]==1:
+            load_P = -Sbus[bus_index].real
+            load_Q = -Sbus[bus_index].imag
+            
+            
+        else:
+            generation_P = round(S_inj[bus_index].real,3)
+            generation_Q =  round(S_inj[bus_index].imag,3)
+            loading = (generation_P**2 + generation_Q**2)**(1/2)*MVA_base/Gen_MVA[k]
 
-        bus_results.append([bus_index, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q, load_P, load_Q])
+        bus_results.append([bus_index+1, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q, loading, load_P, load_Q])
 
     # Branch flow results
     branch_results = []
@@ -157,7 +182,7 @@ def DisplayResults(V,lnd):
         branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
 
     #show results
-    headers_bus = ["Bus Nr", "Label", "Voltage Mag (pu)", "Voltage Ang (deg)", "Generation P (pu)", "Generation Q (pu)", "Load P (pu)", "Load Q (pu)"]
+    headers_bus = ["Bus Nr", "Label", "Voltage Mag (pu)", "Voltage Ang (deg)", "Generation P (pu)", "Generation Q (pu)","Generation loading", "Load P (pu)", "Load Q (pu)"]
     headers_branch = ["Branch Nr", "From Bus", "To Bus", "From Bus Inject. P (pu)", "From Bus Inject. Q (pu)", "To Bus Inject. P (pu)", "To Bus Inject. Q (pu)"]
 
     print("=====================================================================")

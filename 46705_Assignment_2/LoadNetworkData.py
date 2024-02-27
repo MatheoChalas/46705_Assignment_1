@@ -41,7 +41,6 @@ def LoadNetworkData(filename):
     for line in line_data:
         bus_fr, bus_to, id_, R, X, B, X2, X0, MVA_rate = line #unpack the values
         
-        bus_fr, bus_to, id_, R,X,B = line #unpack
         ind_fr = bus_to_ind[bus_fr]    
         ind_to = bus_to_ind[bus_to] 
         Z_se = R + 1j*X; Y_se = 1/Z_se
@@ -78,11 +77,15 @@ def LoadNetworkData(filename):
         SLD =(PLD+1j*QLD)/MVA_base
         Sbus[ind_nr] += -SLD 
          
-    for line in gen_data:
+    for line,i in zip(gen_data,range(len(gen_data))):
         bus_nr, MVA_size, p_gen, X1, X2, X0, Xn, grnd = line
         ind_nr = bus_to_ind[bus_nr]
         SLD =(p_gen)/MVA_base
-        Sbus[ind_nr] += SLD 
+        Sbus[ind_nr] += SLD
+        
+        Gen_MVA[i]=MVA_size
+        
+        
         
     
     V0 = np.ones(N,dtype=complex)
@@ -113,6 +116,8 @@ def LoadNetworkData(filename):
         Y_to[i,ind_fr] = -Y_se
         br_f[i] = ind_fr
         br_t[i] = ind_to
+        
+        
     
     for line,i in zip(tran_data,range(len(line_data),N_branches)):
         """new"""
