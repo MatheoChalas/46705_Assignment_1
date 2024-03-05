@@ -156,6 +156,7 @@ def DisplayResults_and_loading(V,lnd):
     bus_labels = lnd.bus_labels
     Sbus=lnd.Sbus
     Gen_MVA=lnd.Gen_MVA
+    Lines=lnd.Lines
     
     
     #Computation of the injected apparent powers
@@ -179,28 +180,33 @@ def DisplayResults_and_loading(V,lnd):
         generation_P = "-"
         generation_Q = "-"
         loading="-"
+        loading_from="-"
+        loading_to="-"
         
         
         #Differenciation of the loads and generators
         if buscode[bus_index]==1:
-            load_P = -Sbus[bus_index].real
-            load_Q = -Sbus[bus_index].imag
+            load_P = round(SLD[bus_index].real,3)
+            load_Q = round(SLD[bus_index].imag,3)
             
         else:
-            generation_P = round(S_inj[bus_index].real,3)
-            generation_Q =  round(S_inj[bus_index].imag,3)
-            loading=(((generation_P**2)+(generation_Q**2)**0.5)/Gen_MVA[bus_index])*MVA_base
+            generation_P = round(S_inj[bus_index].real+SLD[bus_index].real,3)
+            generation_Q =  round(S_inj[bus_index].imag+SLD[bus_index].imag,3)
+            loading="%.2f" %round(((((generation_P**2)+(generation_Q**2))**0.5)/Gen_MVA[bus_index])*MVA_base*100,2) +"%"
+            load_P = SLD[bus_index].real
+            load_Q = SLD[bus_index].imag
+            
 
         bus_results.append([bus_index+1, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q,loading,load_P, load_Q])
 
     # Branch flow results
     branch_results = []
-    
+    i=0
     #Extraction of the needed values for all the busses 
-    for i in range(len(br_f)):
+    for el in Lines:
         
-        from_bus = ind_to_bus[br_f[i]]
-        to_bus = ind_to_bus[br_t[i]]
+        from_bus = ind_to_bus[el[0]]
+        to_bus = ind_to_bus[el[1]]
         
         #Computation of the apparent powers flowing in both directions
         S_to = round(V[br_t[i]]*(Y_to.dot(V)).conj()[i],3)
@@ -210,15 +216,18 @@ def DisplayResults_and_loading(V,lnd):
         from_bus_injection_Q = round(S_from.imag ,3)
         to_bus_injection_P = round(S_to.real,3)
         to_bus_injection_Q = round(S_to.imag,3)
+        loading_from="%.2f" %round(((((from_bus_injection_P**2)+(from_bus_injection_Q**2))**0.5)/el[5])*MVA_base*100,2) +"%"
+        loading_to="%.2f" %round(((((to_bus_injection_P**2)+(to_bus_injection_Q**2))**0.5)/el[5])*MVA_base*100,2) +"%"
+        
         
         #Add the wanted data to the branch results list
         branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
-
+        i+=1
     #show results
     
     #Define the headers of the results
     headers_bus = ["Bus Nr", "Label", "Voltage Mag (pu)", "Voltage Ang (deg)", "Generation P (pu)", "Generation Q (pu)","Loading","Load P (pu)", "Load Q (pu)"]
-    headers_branch = ["Branch Nr", "From Bus", "To Bus", "From Bus Inject. P (pu)", "From Bus Inject. Q (pu)", "To Bus Inject. P (pu)", "To Bus Inject. Q (pu)"]
+    headers_branch = ["Branch Nr", "From Bus", "To Bus", "From Bus Inject. P (pu)", "From Bus Inject. Q (pu)","From Bus Loading", "To Bus Inject. P (pu)", "To Bus Inject. Q (pu)","To Bus Loading"]
 
     print("=====================================================================")
     print("| Bus results |")

@@ -18,7 +18,7 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 #filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA 
+    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, Load_list 
     
     bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus =  rd.read_network_data_from_file(filename)
 
@@ -66,15 +66,14 @@ def LoadNetworkData(filename):
     for line in load_data:
         bus_nr, PLD, QLD = line
         ind_nr = bus_to_ind[bus_nr]
-        SLD =(PLD+1j*QLD)/MVA_base
-        Sbus[ind_nr] += -SLD 
+        SLD[ind_nr] =(PLD+1j*QLD)/MVA_base
+        Sbus[ind_nr] += -SLD[ind_nr] 
     
     #Get generator data
     for line in gen_data:
         bus_nr, MVA_size, p_gen,X, X2, X0, Xn, GRND = line #new
         ind_nr = bus_to_ind[bus_nr]
-        S_LD =(p_gen)/MVA_base
-        Sbus[ind_nr] += S_LD 
+        Sbus[ind_nr] += (p_gen)/MVA_base
         Gen_MVA[ind_nr]=MVA_size
     
     V0 = np.ones(N,dtype=complex)
