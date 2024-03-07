@@ -201,12 +201,13 @@ def DisplayResults_and_loading(V,lnd):
 
     # Branch flow results
     branch_results = []
-    i=0
+    MVAlines = [[Lines[i][-1]] for i in range(len(Lines))] #Extraction of the Power Ratings from matrix Lines
+    
     #Extraction of the needed values for all the busses 
-    for el in Lines:
-        
-        from_bus = ind_to_bus[el[0]]
-        to_bus = ind_to_bus[el[1]]
+    for i in range(len(Lines)):
+       
+        from_bus = ind_to_bus[br_f[i]]
+        to_bus = ind_to_bus[br_t[i]]
         
         #Computation of the apparent powers flowing in both directions
         S_to = round(V[br_t[i]]*(Y_to.dot(V)).conj()[i],3)
@@ -216,12 +217,12 @@ def DisplayResults_and_loading(V,lnd):
         from_bus_injection_Q = round(S_from.imag ,3)
         to_bus_injection_P = round(S_to.real,3)
         to_bus_injection_Q = round(S_to.imag,3)
-        loading_from="%.2f" %round(((((from_bus_injection_P**2)+(from_bus_injection_Q**2))**0.5)/el[5])*MVA_base*100,2) +"%"
-        loading_to="%.2f" %round(((((to_bus_injection_P**2)+(to_bus_injection_Q**2))**0.5)/el[5])*MVA_base*100,2) +"%"
+        loading_from="%.2f" %round(((((from_bus_injection_P**2)+(from_bus_injection_Q**2))**0.5)/MVAlines[i][0])*MVA_base*100,2) +"%"
+        loading_to="%.2f" %round(((((to_bus_injection_P**2)+(to_bus_injection_Q**2))**0.5)/MVAlines[i][0])*MVA_base*100,2) +"%"
         
         
         #Add the wanted data to the branch results list
-        branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q, to_bus_injection_P, to_bus_injection_Q])
+        branch_results.append([i + 1, from_bus, to_bus, from_bus_injection_P, from_bus_injection_Q,loading_from, to_bus_injection_P, to_bus_injection_Q,loading_to])
         i+=1
     #show results
     
