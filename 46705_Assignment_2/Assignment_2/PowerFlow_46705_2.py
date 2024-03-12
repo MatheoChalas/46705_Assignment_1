@@ -11,18 +11,19 @@ import numpy as np
 from tabulate import tabulate
 
 # 1. the PowerFlowNewton() function
-def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
+def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol,print_progress=True):
     ''' String here with purpose '''
     # implement your code here
     success = 0 #Initializationof statusflagand iterationcounter
     n = 0
     V = V0
-    print(' iteration maximumP &Q mismatch(pu)')
-    print('------------------------------------')
+    if print_progress:
+        print(' iteration maximumP &Q mismatch(pu)')
+        print('------------------------------------')
     #Determinemismatchbetweeninitialguessand andspecifiedvalueforP andQ
     F = calculate_F(Ybus,Sbus,V,pv_index,pq_index)
     #Checkif thedesiredtoleranceisreached
-    success =CheckTolerance(F,n,err_tol)
+    success =CheckTolerance(F,n,err_tol,print_progress)
     #Startthe Newtoniterationloop
     while (not success) and (n < max_iter):
         n += 1 # Updatecounter
@@ -34,12 +35,12 @@ def PowerFlowNewton(Ybus,Sbus,V0,pv_index,pq_index,max_iter,err_tol):
         # Updatevoltagesand checkiftoleranceisnow reached
         V = Update_Voltages(dx,V,pv_index,pq_index)
         F = calculate_F(Ybus,Sbus,V,pv_index,pq_index)
-        success = CheckTolerance(F,n,err_tol)
-    
-    if success: #printoutmessageconcerningwetherthe powerflowconvergedornot
-        print('The NewtonRapsonPowerFlow Converged in %d iterations!'% (n,))
-    else:
-        print('No Convergence!!!\n Stopped after %d iterations without solution...'% (n,))
+        success = CheckTolerance(F,n,err_tol,print_progress)
+    if print_progress:
+        if success: #printoutmessageconcerningwetherthe powerflowconvergedornot
+            print('The NewtonRapsonPowerFlow Converged in %d iterations!'% (n,))
+        else:
+            print('No Convergence!!!\n Stopped after %d iterations without solution...'% (n,))
     return V,success,n
 
 
@@ -59,21 +60,25 @@ def calculate_F(Ybus,Sbus,V,pv_index,pq_index):
     return F
 
 
+
 # 3. the CheckTolerance() function
-def CheckTolerance(F,n,err_tol):
+def CheckTolerance(F,n,err_tol,print_progress):
     #Computation of the maximal mismatch
     normF = np.linalg.norm(F,np.inf)
     
     #Display of the first line of the Test Tolerance
-    if n==0:
-        print("Check Tolerance :")
-    print("Absolute value of the greatest mismatch : %f" %normF,"Iteration number : %d" %n)
+    if print_progress:
+        if n==0:
+            print("Check Tolerance :")
+    
+        print("Absolute value of the greatest mismatch : %f" %normF,"Iteration number : %d" %n)
     
     #Display of the last line of the Test Tolerance and giving to success the value of 1 if the mismatch is lower than the error tolerated
     if normF<err_tol:
         success=1
-        print("End of Check Tolerance")
-        print("------------------------------------")
+        if print_progress:
+            print("End of Check Tolerance")
+            print("------------------------------------")
     
     #If the maximal mismatch is not below the error tolerated it gives the value of 0 to success 
     else :

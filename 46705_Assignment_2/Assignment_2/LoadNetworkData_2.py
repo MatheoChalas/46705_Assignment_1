@@ -18,7 +18,7 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 #filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, Load_list 
+    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, Load_list, br_Ymat 
     
     bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus =  rd.read_network_data_from_file(filename)
 
@@ -88,6 +88,9 @@ def LoadNetworkData(filename):
     
     Y_fr = np.zeros((N_branches,N),dtype=complex)
     Y_to = np.zeros((N_branches,N),dtype=complex)
+    
+    format=(2,2)
+    br_Ymat = np.zeros((N_branches, *(2,2)), dtype=complex)
         
     for line,i in zip(line_data,range(len(line_data))):
         bus_fr, bus_to, id_, R,X,B_2,X2, X0, MVA_rate = line #unpack #new
@@ -102,6 +105,12 @@ def LoadNetworkData(filename):
         Y_to[i,ind_fr] = -Y_se
         br_f[i] = ind_fr
         br_t[i] = ind_to
+        
+        #Y_mat
+        
+        br_Ymat[i]= [[Y_se + Y_sh_2, -Y_se],
+                   [-Y_se, Y_se + Y_sh_2]]
+
     
     for line,i in zip(tran_data,range(len(line_data),N_branches)):
         bus_fr, bus_to, id_, R,X,n,ang1,fr_co, to_co, X2, X0, MVA_rate = line #unpack
@@ -127,6 +136,9 @@ def LoadNetworkData(filename):
         Y_fr[i,ind_to] =  Yps_mat[0,1]
         Y_to[i,ind_to] =  Yps_mat[1,1]       
         Y_to[i,ind_fr] =  Yps_mat[1,0]
+        
+
+        br_Ymat[i]=Yps_mat
         
     return
 
