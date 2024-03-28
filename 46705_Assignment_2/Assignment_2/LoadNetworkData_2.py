@@ -14,20 +14,24 @@ tran_data: contains [fr_bus, to_bus, ID_label, R_eq, X_eq, n_pu, ang_deg]
 mva_base: the system MVA base
 bus_to_ind: mapping from bus numbers to the corresponding indices in the bus matrices and arrays
 ind_to_bus: containing the mapping from the indices to the busses (the opposite of the above)
+Lines: rows contain [bus_fr, bus_to, id_,Y_se,Y_sh_2,MVA_rate] information about each line
+Trans: rows contain [bus_fr, bus_to, id_, Yps_mat, MVA_rate]  information about each transformer
+Gen_MVA: keep track of generators MVA size (bus indices used)
+br_Ymat: 
 """
 #filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, Load_list, br_Ymat 
+    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, br_Ymat 
     
     bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus =  rd.read_network_data_from_file(filename)
 
     MVA_base = mva_base   #OBS...... should be a part of the network data....
     N = len(bus_data)
     Ybus = np.zeros((N,N),dtype=complex)
-    Lines = [] #New
-    Trans = [] #New
-    Gen_MVA = np.zeros(N) #keep track of generators MVA size (bus indices used) "New
+    Lines = [] #new
+    Trans = [] #new
+    Gen_MVA = np.zeros(N) #keep track of generators MVA size (bus indices used) #new
     
     for line in line_data:
         bus_fr, bus_to, id_, R,X,B_2,X2, X0, MVA_rate = line #unpack the lines
@@ -74,7 +78,7 @@ def LoadNetworkData(filename):
         bus_nr, MVA_size, p_gen,X, X2, X0, Xn, GRND = line #new
         ind_nr = bus_to_ind[bus_nr]
         Sbus[ind_nr] += (p_gen)/MVA_base
-        Gen_MVA[ind_nr]=MVA_size
+        Gen_MVA[ind_nr]=MVA_size #new
     
     V0 = np.ones(N,dtype=complex)
     pq_index = np.where(buscode == 1)[0]
@@ -90,7 +94,7 @@ def LoadNetworkData(filename):
     Y_to = np.zeros((N_branches,N),dtype=complex)
     
     format=(2,2)
-    br_Ymat = np.zeros((N_branches, *(2,2)), dtype=complex)
+    br_Ymat = np.zeros((N_branches, *(2,2)), dtype=complex) #new
         
     for line,i in zip(line_data,range(len(line_data))):
         bus_fr, bus_to, id_, R,X,B_2,X2, X0, MVA_rate = line #unpack #new
