@@ -162,7 +162,7 @@ def DisplayResults_and_loading(V,lnd):
     Sbus=lnd.Sbus
     Gen_MVA=lnd.Gen_MVA
     Lines=lnd.Lines
-    
+    bus_NR=lnd.bus_NR
     
     #Computation of the injected apparent powers
     S_inj = V*(Ybus.dot(V)).conj()
@@ -176,6 +176,7 @@ def DisplayResults_and_loading(V,lnd):
     #Extraction of the needed values for all the busses 
     for i in range(len(bus_labels)):
         bus_index = i
+        bus_name = bus_NR[i]
         bus_label = bus_labels[i]
         bus_voltage_mag = round(abs(V[bus_index]),3)
         bus_voltage_ang = round(np.angle(V[bus_index], deg=True),2)
@@ -184,9 +185,9 @@ def DisplayResults_and_loading(V,lnd):
         load_Q = "-"
         generation_P = "-"
         generation_Q = "-"
-        loading="-"
-        loading_from="-"
-        loading_to="-"
+        loading="-" #loading of the generators
+        loading_from="-" #loading of the lines
+        loading_to="-" #loading of the lines
         
         
         #Differenciation of the loads and generators
@@ -202,7 +203,7 @@ def DisplayResults_and_loading(V,lnd):
             load_Q = SLD[bus_index].imag
             
 
-        bus_results.append([bus_index+1, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q,loading,load_P, load_Q])
+        bus_results.append([bus_name, bus_label, bus_voltage_mag, bus_voltage_ang, generation_P, generation_Q,loading,load_P, load_Q])
 
     # Branch flow results
     branch_results = []

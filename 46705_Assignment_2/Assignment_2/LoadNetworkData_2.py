@@ -17,12 +17,12 @@ ind_to_bus: containing the mapping from the indices to the busses (the opposite 
 Lines: rows contain [bus_fr, bus_to, id_,Y_se,Y_sh_2,MVA_rate] information about each line
 Trans: rows contain [bus_fr, bus_to, id_, Yps_mat, MVA_rate]  information about each transformer
 Gen_MVA: keep track of generators MVA size (bus indices used)
-br_Ymat: 
+br_Ymat: store the admittance matrix of each branch
 """
 #filename = 'TestSystem.txt'
 
 def LoadNetworkData(filename):
-    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, br_Ymat 
+    global Ybus, Y_fr, Y_to, br_f, br_t, ind_to_bus, bus_to_ind, buscode, bus_labels, SLD, MVA_base, Sbus, V0, pv_index, pq_index,Lines, Trans, Gen_MVA, br_Ymat, bus_NR 
     
     bus_data,load_data,gen_data,line_data, tran_data,mva_base, bus_to_ind, ind_to_bus =  rd.read_network_data_from_file(filename)
 
@@ -32,6 +32,7 @@ def LoadNetworkData(filename):
     Lines = [] #new
     Trans = [] #new
     Gen_MVA = np.zeros(N) #keep track of generators MVA size (bus indices used) #new
+    bus_NR = [line[0] for line in bus_data]
     
     for line in line_data:
         bus_fr, bus_to, id_, R,X,B_2,X2, X0, MVA_rate = line #unpack the lines
@@ -110,7 +111,7 @@ def LoadNetworkData(filename):
         br_f[i] = ind_fr
         br_t[i] = ind_to
         
-        #Y_mat
+        #Y_mat store the admittance matrix of each branch
         
         br_Ymat[i]= [[Y_se + Y_sh_2, -Y_se],
                    [-Y_se, Y_se + Y_sh_2]]

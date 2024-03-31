@@ -36,10 +36,10 @@ def System_violations(V,Ybus,Y_from,Y_to,lnd):
         
             
         if abs(S_from)*MVA_base>MVAlines[i][0]: 
-            violations.append("Power flow violation in branch %d "%(i+1) + "from bus %d "%(br_f[i]+1) +  "to bus %d : "%(br_t[i]+1) + str(round(abs(S_from)/MVAlines[i][0]*MVA_base*100,2)) + "%")
+            violations.append("Power flow violation in branch %d "%(i+1) + "from bus %d "%(ind_to_bus[br_f[i]]) +  "to bus %d : "%(ind_to_bus[br_t[i]]) + str(round(abs(S_from)/MVAlines[i][0]*MVA_base*100,2)) + "%")
             
         if abs(S_to)*MVA_base>MVAlines[i][0]:
-             violations.append("Power flow violation in branch %d "%(i+1) + "from bus %d "%(br_t[i]+1) +  "to bus %d : "%(br_f[i]+1) + str(round(abs(S_to)/MVAlines[i][0]*MVA_base*100,2)) + "%")
+             violations.append("Power flow violation in branch %d "%(i+1) + "from bus %d "%(ind_to_bus[br_t[i]]) +  "to bus %d : "%(ind_to_bus[br_f[i]]) + str(round(abs(S_to)/MVAlines[i][0]*MVA_base*100,2)) + "%")
                   
 #Check output of all generators and see if limits are exceeded
     
@@ -47,16 +47,16 @@ def System_violations(V,Ybus,Y_from,Y_to,lnd):
         bus_index = i 
         if buscode[bus_index]==2 or buscode[bus_index]==3:
             if abs(S_gen[bus_index])*MVA_base>Gen_MVA[bus_index]:
-                violations.append("Power generation violation at bus %d with a value of : " %(bus_index+1)  + str(round(abs(S_gen[bus_index])/Gen_MVA[bus_index]*MVA_base*100,2)) + "%")
+                violations.append("Power generation violation at bus %d with a value of : " %(ind_to_bus[bus_index])  + str(round(abs(S_gen[bus_index])/Gen_MVA[bus_index]*MVA_base*100,2)) + "%")
     
                 
 #Check voltages on all busses and see if it remains between 0.9 and 1.1 pu
     N=len(V)
     for i in range (N):
         if abs(V[i])<0.9 :
-            violations.append("Voltage violation at bus %d : "%(i+1) + str(round(abs(V[i]),3)) + " pu < 0.9 pu")
+            violations.append("Voltage violation at bus %d : "%(ind_to_bus[i]) + str(round(abs(V[i]),3)) + " pu < 0.9 pu")
         if abs(V[i])>1.1 :
-            violations.append("Voltage violation at bus %d : "%(i+1) + str(round(abs(V[i]),3)) + " pu < 1.1 pu")
+            violations.append("Voltage violation at bus %d : "%(ind_to_bus[i]) + str(round(abs(V[i]),3)) + " pu < 1.1 pu")
     return violations
 
 
