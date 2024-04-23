@@ -6,6 +6,7 @@ carry out Fault Analysis calculations in python.
 
 import numpy as np
 import math
+import cmath
 
 # 1. the FaultAnalysis() function
 def FaultAnalysis(Zbus0,Zbus1,Zbus2,bus_to_ind,fault_bus,fault_type,Zf,Vf):
@@ -91,9 +92,56 @@ def Convert_Sequence2Phase_Voltages(Vseq_mat):
 # ####################################################
 # 2. the DisplayFaultAnalysisResults() function
 def DisplayFaultAnalysisResults(Iph,Vph_mat,fault_bus,fault_type,Zf,Vf):
+    fault_name=""
+    if fault_type == 0:
+        fault_name="| 3-phase balanced fault at Bus %d." %(fault_bus)
+    elif fault_type == 1:
+        fault_name="| Single Line-to-Ground fault at Bus %d, phase a." %(fault_bus)
+    elif fault_type == 2:
+        fault_name="| Line-to-Line fault at Bus %d, between phase b and phase c." %(fault_bus)
+    elif fault_type == 3:
+        fault_name="| Double Line-to-Ground fault at Bus %d, phase b and c." %(fault_bus)
+   
+    Ia=Iph[0]
+    Ib=Iph[1]
+    Ic=Iph[2]    
+    
+    data=[]
+    for k in range(len(Vph_mat)):
+        line=[k,abs(Vph_mat[k,0]),cmath.phase(Vph_mat[k,0])*180/math.pi,abs(Vph_mat[k,1]),cmath.phase(Vph_mat[k,1])*180/math.pi,abs(Vph_mat[k,2]),cmath.phase(Vph_mat[k,2])*180/math.pi]
+        data.append(line)
+    
     print('==============================================================')
     print('|                  Fault Analysis Results                    |')
     print('==============================================================')
     # enter your code here
-    print('==============================================================')  
+    print(fault_name)
+    print('| Prefault Voltage: Vf = %.3f  (pu)                          |'%(Vf))
+    print('| Fault Impedance:  Zf = %.3f  (pu)                          |'%(Zf))  
+    print('==============================================================')
+    print('| Phase Currents --------------------------------------------|')
+    print('| ----------------                                           |')
+    print('|     ---- Phase a ----| ---- Phase b ----| ---- Phase c ----|')
+    print('|     -----------------|------------------|------------------|')
+    print('|      Mag(pu) Ang(deg)|  Mag(pu) Ang(deg)|  Mag(pu) Ang(deg)|')
+    print('|       %.3f   %.2f |   %.3f  %.2f  |   %.3f  %.2f  |'%(abs(Ia),cmath.phase(Ia)*180/math.pi,abs(Ib),cmath.phase(Ib)*180/math.pi,abs(Ic),cmath.phase(Ic)*180/math.pi))
+    
+    print("=====================================================================")
+    print("| Phase Line-to-Ground Voltages -----------------------------|")
+    print("=====================================================================")
+    print("| -----------------------------                              |") 
+    print("|   | ---- Phase a ----| ---- Phase b ----| ---- Phase c ----|") 
+    print("|Bus|------------------|------------------|------------------|") 
+    print("|   |  Mag(pu) Ang(deg)|  Mag(pu) Ang(deg)|  Mag(pu) Ang(deg)|") 
+    print("|---| -------- ------- | -------- ------- | -------- ------- |")
+    print("| %d |   %.3f     %.2f |  %.3f  %.2f  |   %.3f  %.2f  |"%(data[0][0],data[0][1],data[0][2],data[0][3],data[0][4],data[0][5],data[0][6])) 
+    print("| %d |   %.3f     %.2f |  %.3f  %.2f  |   %.3f  %.2f  |"%(data[1][0],data[1][1],data[1][2],data[1][3],data[1][4],data[1][5],data[1][6]))
+    print("| %d |   %.3f   %.2f |  %.3f  %.2f  |   %.3f  %.2f  |"%(data[2][0],data[2][1],data[2][2],data[2][3],data[2][4],data[2][5],data[2][6]))
+    print("| %d |   %.3f     %.2f |  %.3f  %.2f  |   %.3f  %.2f  |"%(data[3][0],data[3][1],data[3][2],data[3][3],data[3][4],data[3][5],data[3][6]))
+    print("| %d |   %.3f     %.2f |  %.3f  %.2f  |   %.3f  %.2f  |"%(data[4][0],data[4][1],data[4][2],data[4][3],data[4][4],data[4][5],data[4][6]))
+    print("==============================================================") 
+
+
+    
+  
     return
