@@ -198,7 +198,9 @@ def LoadNetworkData4FA(filename):
         elif fr_co==2 and to_co==2:
             Zeq = 1j*X0; Yeq = 1/Zeq #We neglect the resistance. We consider X0 
         elif fr_co==2 and to_co==3:
-            Yeq = 0 #We neglect the resistance. We consider X0 (OPEN CIRCUIT-INFINIT IMPEDANCE) WE NEED TO CONSIDER X0 in diagonal
+            Yeq = 0; Yfr = 1/(1j*X0) #We neglect the resistance. We consider X0 (OPEN CIRCUIT-INFINIT IMPEDANCE) WE NEED TO CONSIDER X0 in diagonal
+        elif fr_co==3 and to_co==2:
+            Yeq = 0; Yto = 1/(1j*X0) #We neglect the resistance. We consider X0 (OPEN CIRCUIT-INFINIT IMPEDANCE) WE NEED TO CONSIDER X0 in diagonal
         elif fr_co==1 and to_co==3:
             Yeq =0 #We neglect the resistance. We consider X0-open circuit
         elif fr_co==3 and to_co==3:
@@ -207,10 +209,10 @@ def LoadNetworkData4FA(filename):
         #c = n*np.exp(1j*ang1/180*np.pi) we neglect the sifhtangle
         Yps_mat = np.zeros((2,2),dtype=complex)
         ### adminttance matrix
-        Yps_mat[0,0] = Yeq
+        Yps_mat[0,0] = Yeq + Yfr
         Yps_mat[0,1] = -Yeq
         Yps_mat[1,0] = -Yeq
-        Yps_mat[1,1] = Yeq
+        Yps_mat[1,1] = Yeq + Yto
         # indices
         ind_ = np.array([ind_fr,ind_to])
         #update
