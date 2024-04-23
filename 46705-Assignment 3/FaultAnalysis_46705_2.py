@@ -83,8 +83,7 @@ def Convert_Sequence2Phase_Voltages(Vseq_mat):
     N=len(Vseq_mat)
     Vph_mat = np.zeros((N,3),dtype=complex)
     for i in range(N):
-        Vph_mat[i]=np.transpose(np.dot(A,np.transpose(Vseq_mat[i])))
-        
+        Vph_mat[i]=np.dot(A,(Vseq_mat[i]))
     return Vph_mat
 
 # ####################################################
